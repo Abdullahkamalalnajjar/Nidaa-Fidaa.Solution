@@ -1,10 +1,11 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Nidaa_Fidaa.Core.Dtos;
 using Nidaa_Fidaa.Core.Entities;
-using Nidaa_Fidaa.Core.Repository;
-using Nidaa_Fidaa.Dtos;
-using System.Collections.Generic;
+using Nidaa_Fidaa.Core.Specification.Handller;
+using Nidaa_Fidaa.Helpers;
+using Nidaa_Fidaa.Services.Abstract;
+using Nidaa_Fidaa.Services.Implmentaion;
 
 namespace Nidaa_Fidaa.Controllers
 {
@@ -12,46 +13,30 @@ namespace Nidaa_Fidaa.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly IGenericRepository<Customer> customerRepo;
-        private readonly IMapper mapper;
+        private readonly ICustomerService _customerService;
 
-        public CustomerController(IGenericRepository<Customer> customerRepo,IMapper mapper)
+        public CustomerController(ICustomerService customerService )
         {
-            this.customerRepo = customerRepo;
-            this.mapper = mapper;
+           _customerService = customerService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<CustomerDto>>> GetAll()
+        [HttpPost("add-customer")]
+
+        public async Task<ActionResult<ApiResponse<Customer>>> AddCustomerAsync([FromForm] CustomerDto customerDto)
+        { 
+        
+            var customer =  await _customerService.AddCustomerAsync(customerDto);
+
+            var response = new ApiResponse<Customer>(200, "تم أضافه الزبون بنجاح", customer);
+            return Ok(response);
+        }
+
+        [HttpGet("GetCustomer")]
+        public async Task<ActionResult<IReadOnlyList<Customer>>> GetCustomers()
         {
-           var customers = await customerRepo.GetAllAsync();
-            var customersMapper = mapper.Map<IReadOnlyCollection<CustomerDto >>(customers);
+            var spec = new CustomerSpecification();
+            var customers = await _customerService.GetCustomerWithSpecAsync(spec);
             return Ok(customers);
-        }
-         
-       [HttpPost]
-     public async Task<ActionResult<string>> AddCustomer([FromQuery]Customer Newcustomer) {
-
-            var customers = await customerRepo.AddCustomerAsync(Newcustomer);
-            if (customers == "Successfully") {
-                return $"Customer: {Newcustomer.Name} Add Successfully";
-            }
-            return "Exist Error";
-        }
-
-
-        [HttpGet("id")]
-        public async Task<ActionResult<CustomerDto>> GetCustomerByid(int id)
-        {
-
-            var customer = await customerRepo.GetByIdAsync(id);
-            if (customer==null)
-            {
-                return NotFound("Customer not found");
-            }
-            var customersMapper = mapper.Map<CustomerDto>(customer);
-
-            return Ok(customersMapper);
         }
     }
 }

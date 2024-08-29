@@ -1,14 +1,14 @@
-﻿namespace Nidaa_Fidaa.Dtos
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Nidaa_Fidaa.Core.Dtos.Trader
 {
-    public class CustomerDto
+    public class AddTrader
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
         public string Governorate { get; set; }
-        public string Zone { get; set; }
-        public string ProfilePictureUrl { get; set; }
+        public string Municipality { get; set; }
         public string? CommercialRegistrationNumber { get; set; } // رقم السجل التجاري
-        public string? TradeActivity { get; set; }
+        public string? TradeActivityName { get; set; }
     }
 }

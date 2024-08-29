@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nidaa_Fidaa.Core.Entities
+namespace Nidaa_Fidaa.Core.Dtos.Shop
 {
-    public class TradeActivity
+    public class ShopCategoryDto
     {
         public int Id { get; set; }
-        public string Name { get; set; } 
+        public string Name { get; set; }
     }
 }

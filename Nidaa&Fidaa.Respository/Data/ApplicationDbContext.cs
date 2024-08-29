@@ -25,6 +25,15 @@ namespace Nidaa_Fidaa.Respository.Data
         }
 
 
+        public DbSet<Trader> Traders { get; set; }
+        public DbSet<Driver> Drivers { get; set; }  
+        public DbSet<Shop> Shops { get; set; }  
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductSize> ProductSizes { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<Basket> Baskets { get; set; }
+        public DbSet<BasketItem> BasketItems { get; set; }
         public DbSet<Customer> Customers { get; set; }
     }
 }
