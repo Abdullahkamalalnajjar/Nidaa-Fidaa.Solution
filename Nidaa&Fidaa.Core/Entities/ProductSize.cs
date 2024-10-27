@@ -11,12 +11,16 @@ namespace Nidaa_Fidaa.Core.Entities
     {
 
         public int Id { get; set; }
-        public string Size { get; set; }
+        public string? Size { get; set; }
         public decimal Price { get; set; }
 
 
         public int ProductId { get; set; }
         [JsonIgnore]
         public Product Product { get; set; }
+
+        [JsonIgnore]
+
+        public BasketItem BasketItem { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using Nidaa_Fidaa.Core.Entities;
 using Nidaa_Fidaa.Core.Specification.Handller;
 using Nidaa_Fidaa.Helpers;
 using Nidaa_Fidaa.Services.Abstract;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Nidaa_Fidaa.Controllers
@@ -48,8 +49,10 @@ namespace Nidaa_Fidaa.Controllers
                 return BadRequest(new ApiResponse<Product>(400, "المنتج موجود بالفعل"));
             }
 
-            
-            return Ok(productAddition);
+            var response = new ApiResponse<ProductAddition>(200, "تم أضافه المنتج بنجاح", productAddition);
+
+
+            return Ok(response);
         } 
 
         [HttpPost("add-product-size")]
@@ -64,15 +67,24 @@ namespace Nidaa_Fidaa.Controllers
                 return BadRequest(new ApiResponse<Product>(400, "الحجم موجود بالفعل"));
             }
 
-            
-            return Ok(productSize);
+            var response = new ApiResponse<ProductSize>(200, "تم أضافه الحجم بنجاح", productSize);
+
+            return Ok(response);
         }
 
         [HttpGet("GetProdcuts")]
-        public async Task<ActionResult<IReadOnlyList<Product>>> GetProducts()
+        public async Task<ActionResult<IReadOnlyCollection<Product>>> GetProducts()
         {
             var spec = new ProductSpecification();
             var products = await _productService.GetProductsWithSepc(spec);
+            return Ok(products);
+        }
+
+        [HttpGet("get-product-byId")]
+        public async Task<ActionResult<ProductViewDtoByid>> GetProduct(int id)
+        {
+            var spec = new ProductSpecification(id);
+            var products = await _productService.GetProductByIdWithSpec(spec);
             return Ok(products);
         }
 
@@ -88,11 +100,13 @@ namespace Nidaa_Fidaa.Controllers
                 return NotFound("Product not found.");
             }
 
-            return Ok(updatedProduct);
+            var response = new ApiResponse<Product>(200, "تم التعديل علي المنتج بنجاح", updatedProduct);
+
+            return Ok(response);
         }
 
         [HttpPut("update-size")]
-        public async Task<IActionResult> UpdateProductSize([FromBody] ProductSizeDto updateProductSizeDto)
+        public async Task<IActionResult> UpdateProductSize([FromQuery] UpdateProductSizeDto updateProductSizeDto)
         {
             if (updateProductSizeDto == null)
             {
@@ -106,11 +120,13 @@ namespace Nidaa_Fidaa.Controllers
                 return NotFound("Product size not found.");
             }
 
-            return Ok(updatedProductSize);
+            var response = new ApiResponse<ProductSize>(200, "تم التعديل علي  حجم المنتج بنجاح", updatedProductSize);
+
+            return Ok(response);
         }
 
         [HttpPut("update-addition")]
-        public async Task<IActionResult> UpdateProductAddition([FromBody] UpdateProductAdditionDto updateProductAdditionDto)
+        public async Task<IActionResult> UpdateProductAddition([FromQuery] UpdateProductAdditionDto updateProductAdditionDto)
         {
             if (updateProductAdditionDto == null)
             {
@@ -124,7 +140,68 @@ namespace Nidaa_Fidaa.Controllers
                 return NotFound("Product addition not found.");
             }
 
-            return Ok(updatedProductAddition);
+            var response = new ApiResponse<ProductAddition>(200, "تم التعديل بنجاح", updatedProductAddition);
+
+            return Ok(response);
+        }
+        [HttpDelete("delete-productaddition")]
+
+        public async Task<IActionResult> DeleteProductAddition(int id)
+        {
+
+
+            var productaddition = await _productService.DeleteProductAdditionAsync(id);
+
+            if (productaddition == false) {
+                return BadRequest(new ApiResponse<ProductAddition>(200, " حدث خطا"));
+            }
+            var response = new ApiResponse<ProductAddition>(200, "تم الحذف بنجاح");
+
+            return Ok(response);
+        }
+
+        [HttpDelete("delete-product-size")]
+
+        public async Task<IActionResult> DeleteProductSize(int id)
+        {
+
+
+            var productsize = await _productService.DeleteProductSizeAsync(id);
+
+            if (productsize == false)
+            {
+                return BadRequest(new ApiResponse<ProductSize>(200, " حدث خطا"));
+            }
+            var response = new ApiResponse<ProductSize>(200, "تم الحذف بنجاح");
+
+            return Ok(response);
+        }
+
+        [HttpGet("search-product-byTitle")]
+
+        public async Task<ActionResult<Product>> SearchProductByTitle(string title) { 
+        
+        
+            var spec= new ProductSpecification(title);
+            var product = await _productService.SearchProductAsync(spec);
+
+            if (product == null)
+            {
+                return NotFound(new ApiResponse<Product>(404,"لا يوجد نتائج"));
+            }
+            return Ok(product);
+        }
+
+        [HttpGet("price-range")]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsInPriceRange([FromQuery] decimal minPrice, [FromQuery] decimal maxPrice)
+        {
+            var products = await _productService.GetProductsInPriceRangeAsync(minPrice, maxPrice);
+
+            if (products == null)
+            {
+                return NotFound(new ApiResponse< IEnumerable < Product >> (404, "لا يوجد نتائج"));
+            }
+            return Ok(products);
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Nidaa_Fidaa.Core.Dtos.Product;
 using Nidaa_Fidaa.Core.Entities;
@@ -80,25 +81,85 @@ namespace Nidaa_Fidaa.Services.Implmentaion
         {
             return await _productRepo.GetAllWithSpecAsync(spec);
         }
-
-        public async Task<Product> UpdateProductAsync(UpdateProductDto updateproductDto)
+        public async Task<Product> UpdateProductAsync(UpdateProductDto updateProductDto)
         {
+            // العثور على المنتج الحالي من قاعدة البيانات
             var existingProduct = await _productRepo.GetTableNoTracking()
-                                                    .Where(m => m.Id == updateproductDto.Id)
+                                                    .Where(m => m.ProductId == updateProductDto.Id)
                                                     .Include(m => m.ProductAdditions)
                                                     .Include(m => m.ProductSizes)
+                                                    .Include(m => m.Images) // إضافة Include للصور المرتبطة
                                                     .FirstOrDefaultAsync();
 
             if (existingProduct != null)
             {
-                _mapper.Map(updateproductDto, existingProduct);
+                // التحقق من كل خاصية وتحديثها فقط إذا كانت غير null
+                if (updateProductDto.Title != null)
+                {
+                    existingProduct.Title = updateProductDto.Title;
+                }
 
+                if (updateProductDto.Description != null)
+                {
+                    existingProduct.Description = updateProductDto.Description;
+                }
+
+                if (updateProductDto.BasePrice.HasValue)
+                {
+                    existingProduct.BasePrice = updateProductDto.BasePrice.Value;
+                }
+
+                if (updateProductDto.DiscountedPrice.HasValue)
+                {
+                    existingProduct.DiscountedPrice = updateProductDto.DiscountedPrice.Value;
+                }
+
+                if (updateProductDto.BaseImage != null)
+                {
+                    existingProduct.BasePicture = SaveFile(updateProductDto.BaseImage, "UpdateBaseImages");
+                }
+
+                if (updateProductDto.CategoryId.HasValue)
+                {
+                    existingProduct.CategoryId = updateProductDto.CategoryId.Value;
+                }
+
+                if (updateProductDto.ShopId.HasValue)
+                {
+                    existingProduct.ShopId = updateProductDto.ShopId.Value;
+                }
+
+                if (updateProductDto.DeliveryPrice.HasValue) {
+
+                    existingProduct.DeliveryPrice = updateProductDto.DeliveryPrice.Value;
+                }
+                if (updateProductDto.DeliveryTime.HasValue)
+                {
+
+                    existingProduct.DeliveryTime = updateProductDto.DeliveryTime.Value;
+                }
+                if (updateProductDto.Rating.HasValue)
+                {
+
+                    existingProduct.Rating = updateProductDto.Rating.Value;
+                }
+
+                if (updateProductDto.Images != null && updateProductDto.Images.Any())
+                {
+                    existingProduct.Images = SaveFilesAsImages(updateProductDto.Images, "UpdateProductImages");
+                }
+
+                // تحديث المنتج في قاعدة البيانات
                 await _productRepo.UpdateAsync(existingProduct);
+
+                // إرجاع المنتج المحدث
                 return existingProduct;
             }
 
+            // إذا لم يتم العثور على المنتج، إرجاع null
             return null;
         }
+
 
         public async Task<ProductAddition> UpdateProductAdditionAsync(UpdateProductAdditionDto updateProductAdditionDto)
         {
@@ -119,23 +180,123 @@ namespace Nidaa_Fidaa.Services.Implmentaion
             return existingProductAddition;
         }
 
-        public async Task<ProductSize> UpdateProductSizeAsync(ProductSizeDto updateProductSizeDto)
+        public async Task<ProductSize> UpdateProductSizeAsync(UpdateProductSizeDto updateProductSizeDto)
         {
+            // تحقق من وجود الكيان الذي تريد تحديثه بناءً على معرف المنتج
             var existingProductSize = await _productSize
                 .GetTableNoTracking()
-                .Where(ps => ps.Id == updateProductSizeDto.ProductId)
+                .Where(ps => ps.Id == updateProductSizeDto.Id) // التحقق باستخدام المعرف الصحيح
                 .FirstOrDefaultAsync();
 
             if (existingProductSize == null)
             {
-                return null; // Product size not found
+                return null; // إذا لم يتم العثور على الحجم، أرجع null
             }
 
-            // Update the existing product size with new values
-            _mapper.Map(updateProductSizeDto, existingProductSize);
+            existingProductSize.Size = updateProductSizeDto.Size;
+            existingProductSize.Price = updateProductSizeDto.Price;
 
             await _productSize.UpdateAsync(existingProductSize);
             return existingProductSize;
         }
+
+
+        public async Task<ProductViewDtoByid> GetProductByIdWithSpec(ISpecification<Product> spec)
+        {
+            var product = await _productRepo.GetByIdWithSpecAsync(spec);
+            if (product == null)
+            {
+                return null;
+            }
+
+            var productMapper = _mapper.Map<ProductViewDtoByid>(product);
+            return productMapper;
+        }
+
+
+        private string SaveFile(IFormFile file, string folderName)
+        {
+            if (file == null || file.Length == 0)
+                return null;
+
+            // Define the path to save the file
+            string uploadsFolder = Path.Combine("wwwroot", folderName);
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            // Ensure the directory exists
+            Directory.CreateDirectory(uploadsFolder);
+
+            // Save the file
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
+
+            // Get the server name and base URL
+            string serverBaseUrl = "http://nidaafidaa.runasp.net/"; // Replace with your actual server name
+            string relativePath = Path.Combine(folderName, uniqueFileName);
+
+            // Return the full URL to the file
+            return $"{serverBaseUrl}/{relativePath.Replace("\\", "/")}";
+        }
+
+
+        private List<Image> SaveFilesAsImages(List<IFormFile> files, string folderName)
+        {
+            var images = new List<Image>();
+
+            foreach (var file in files)
+            {
+                var fileUrl = SaveFile(file, folderName);
+                if (fileUrl != null)
+                {
+                    images.Add(new Image { Path = fileUrl });
+                }
+            }
+
+            return images;
+        }
+
+        public async Task<bool> DeleteProductSizeAsync(int productSizeId)
+        {
+            var productSize = await _productSize.GetTableNoTracking().Where(ps=>ps.Id.Equals(productSizeId)).FirstOrDefaultAsync();
+            if (productSize == null) return false;
+
+            await _productSize.DeleteAsync(productSize);
+            return true;
+        }
+
+        public async Task<bool> DeleteProductAdditionAsync(int productAdditionId)
+        {
+            var productAddition = await _productAdditionRepository.GetTableNoTracking().Where(ps => ps.Id.Equals(productAdditionId)).FirstOrDefaultAsync();
+            if (productAddition == null) return false;
+
+            await _productAdditionRepository.DeleteAsync(productAddition);
+            return true;
+        }
+
+        public async Task<Product> SearchProductAsync(ISpecification<Product> spec)
+        {
+
+            var product =   await _productRepo.GetSingleWithSpecAsync(spec);
+
+            return product;
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsInPriceRangeAsync(decimal minPrice, decimal maxPrice)
+        {
+            var products = await _productRepo.GetTableNoTracking()
+                .Where(p=>p.BasePrice>=minPrice && p.BasePrice<=maxPrice)
+                .OrderByDescending(p=>p.BasePrice)
+                .ToListAsync();
+            if (products==null)
+            {
+                return null;
+            }
+            return products;
+        }
+
     }
 }

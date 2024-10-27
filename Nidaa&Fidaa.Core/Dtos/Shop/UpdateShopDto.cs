@@ -9,15 +9,19 @@ namespace Nidaa_Fidaa.Core.Dtos.Shop
 {
     public class UpdateShopDto
     {
-        public int Id { get; set; }
-        public IFormFile MerchantPhotoUrl { get; set; }
-        public IFormFile ShopPhotoUrl { get; set; }
-        public string Location { get; set; }
-        public string BusinessName { get; set; }
-        public string BusinessType { get; set; }
-        public int CustomerId { get; set; }
+        public int ?Id { get; set; }
+        public IFormFile? PhotoUrl { get; set; }
+        public IFormFile? BaseShopPhotoUrl { get; set; }
+        public string ?Location { get; set; }
+        public string ?BusinessName { get; set; }
+        public string ?BusinessType { get; set; }
+        public int ?CustomerId { get; set; }
 
-        public List<int> SelectCatergoryIds { get; set; }  // قائمة معرفات الأقسام
+        public List<int> ?SelectCatergoryIds { get; set; }  // قائمة معرفات الأقسام
+
+        public decimal? Rating { get; set; }
+        public decimal? DeliveryTime { get; set; }
+        public decimal? DeliveryPrice { get; set; }
 
     }
 }

@@ -9,9 +9,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Cryptography;
-using Nidaa_Fidaa.Core.Twilio;
-using Nidaa_Fidaa.Services.Abstract;
 using Nidaa_Fidaa.Services.Implmentaion;
+using Nidaa_Fidaa.Services;
+using Nidaa_Fidaa.Services.Abstract;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Nidaa_Fidaa.Api.Extensions;
+using Nidaa_Fidaa.Repository.Identity;
+using Microsoft.AspNetCore.Identity;
 
 
 namespace Nidaa_Fidaa
@@ -22,49 +27,13 @@ namespace Nidaa_Fidaa
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+         
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
-            #region Barear
-
-            #endregion
-
-
-            #region Auth
-
-            var key = new byte[32]; // 256-bit key
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(key);
-            }
-            builder.Services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(x =>
-            {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                };
-            }); ;
-            #endregion
-
-
-            #region Cfg Twilio
-            builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("Twilio"));
-            builder.Services.AddSingleton<WhatsAppService>();
-            #endregion
+            builder.Services.AddControllers(); 
+            builder.Services.AddHttpClient();
+            builder.Services.AddIdentityServices(builder.Configuration);
 
 
             #region cfg igeneric
@@ -72,6 +41,13 @@ namespace Nidaa_Fidaa
             #endregion
 
             #region ConnectionDatabase
+
+            builder.Services.AddDbContext<AppIdentityDbContext>(opt =>
+            {
+                opt.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
+            });
+
+
             builder.Services.AddDbContext<ApplicationDbContext>(opt =>
             {
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefualtConnection"));
@@ -89,7 +65,10 @@ namespace Nidaa_Fidaa
             builder.Services.AddScoped(typeof(IProductService), typeof(ProductService));
             builder.Services.AddScoped(typeof(IBasketService), typeof(BasketService));
             builder.Services.AddScoped(typeof(ICustomerService), typeof(CustomerService));
-
+            builder.Services.AddScoped(typeof(IFavouriteService), typeof(FavouriteService));
+            builder.Services.AddScoped(typeof(IFilterService), typeof(FilterService));
+            builder.Services.AddScoped(typeof(IOrderService), typeof(OrderService));
+ 
 
             #endregion
 
@@ -103,6 +82,10 @@ namespace Nidaa_Fidaa
             var ILoggerFactory = services.GetRequiredService<ILoggerFactory>();
             try
             {
+
+                var identityDbContext = services.GetRequiredService<AppIdentityDbContext>();
+                await identityDbContext.Database.MigrateAsync();
+
                 var dbContext = services.GetRequiredService<ApplicationDbContext>();
                 await dbContext.Database.MigrateAsync();
                 //await DataSeedDbContext.SeedAsync(dbContext);
@@ -123,6 +106,7 @@ namespace Nidaa_Fidaa
          //  }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

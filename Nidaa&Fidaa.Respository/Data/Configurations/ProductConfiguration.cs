@@ -15,7 +15,7 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
         public void Configure(EntityTypeBuilder<Product> builder)
         {
             // Configure the primary key
-            builder.HasKey(p => p.Id);
+            builder.HasKey(p => p.ProductId);
 
 
 
@@ -32,8 +32,17 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
 
             builder.Property(p => p.BasePrice)
                 .HasColumnType("decimal(18,2)");
+            
+            builder.Property(p => p.DeliveryPrice)
+                .HasColumnType("decimal(18,2)");  
+            
+            builder.Property(p => p.DeliveryTime)
+                .HasColumnType("decimal(18,2)");
 
             builder.Property(p => p.DiscountedPrice)
+                .HasColumnType("decimal(18,2)");   
+            
+            builder.Property(p => p.Rating)
                 .HasColumnType("decimal(18,2)");
 
             builder.Property(p => p.BasePicture);
@@ -70,8 +79,9 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
      .OnDelete(DeleteBehavior.Cascade);
             #endregion
 
-           
 
+
+            builder.Navigation(p => p.OrderItems).AutoInclude(false);
 
 
         }

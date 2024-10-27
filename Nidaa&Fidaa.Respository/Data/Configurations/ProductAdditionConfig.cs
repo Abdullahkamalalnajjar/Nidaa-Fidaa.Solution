@@ -15,7 +15,10 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
         {
             builder.Property(pa => pa.Price).IsRequired().HasColumnType("decimal(18,2)");
 
-           
+           builder.Navigation(p => p.Product).AutoInclude(false);
+
+
+
         }
     }
 }

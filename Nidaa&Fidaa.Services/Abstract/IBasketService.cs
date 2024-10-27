@@ -10,13 +10,15 @@ using System.Threading.Tasks;
 namespace Nidaa_Fidaa.Services.Abstract
 {
     public interface IBasketService
-    {
+    { 
         public Task<Basket> AddBasketAsync(BasketDto basketDto);
         public Task<IReadOnlyCollection<Basket>> GetBasketsAsync(ISpecification<Basket> specification);
+        public Task<Basket?> GetBasketByCustomerIdAsync(int customerId);
 
         public Task<Basket> GetBasketByIdAsync(int id);
-        public Task<BasketItem> AddItemToBasketAsync(BasketItemDto basketItemDto);
-        public Task<BasketItem> RemoveItemFromBasketAsync( int productId);
+        public Task<Basket> AddItemToBasketAsync(BasketItemDto basketItemDto);
+        public Task<bool> RemoveItemFromBasketAsync( int itemId);
+        public Task<BasketItem> EditItemInBasketAsync(int basketItemId, BasketItemDto basketItemDto);
 
     }
 }

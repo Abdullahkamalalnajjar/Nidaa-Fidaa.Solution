@@ -17,5 +17,8 @@ namespace Nidaa_Fidaa.Core.Entities
         public int ProductId { get; set; }
         [JsonIgnore]
         public Product Product { get; set; }
-     }
+
+
+
+    }
 }

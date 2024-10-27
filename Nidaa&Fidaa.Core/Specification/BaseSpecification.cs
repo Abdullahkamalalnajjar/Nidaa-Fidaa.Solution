@@ -12,12 +12,12 @@ namespace Nidaa_Fidaa.Core.Specification
     {
         public Expression<Func<T, bool>> Critaria { get ; set; }
         public List<Expression<Func<T, object>>> Includes { get; set; } =  new List<Expression<Func<T, object>>>();
+        public List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> IncludeChains { get; set; } = new List<Func<IQueryable<T>, IIncludableQueryable<T, object>>>();
         public Expression<Func<T, object>> OrderBy { get; set ; }
         public Expression<Func<T, object>> OrderByDescening { get ; set; }
         public int Take { get ; set; }
         public int Skip { get ; set ; }
         public bool IsPaginatedEnable { get; set ; }
-        public List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> IncludeStrings { get; set ; } = new List<Func<IQueryable<T>, IIncludableQueryable<T, object>>>();
 
         public BaseSpecification()
         {
@@ -28,11 +28,18 @@ namespace Nidaa_Fidaa.Core.Specification
             this.Critaria = Critaria;
         }
 
-        // AddInclude for ThenIncludes
-        protected void AddInclude(Func<IQueryable<T>, IIncludableQueryable<T, object>> includeExpression)
+
+
+        public void AddInclude(Expression<Func<T, object>> includeExpression)
         {
-            IncludeStrings.Add(includeExpression);
+            Includes.Add(includeExpression);
         }
+
+        public void AddInclude(Func<IQueryable<T>, IIncludableQueryable<T, object>> includeChain)
+        {
+            IncludeChains.Add(includeChain);
+        }
+
         public void AddOrderBy(Expression<Func<T, object>> OrderBy)
         {
             this.OrderBy = OrderBy;

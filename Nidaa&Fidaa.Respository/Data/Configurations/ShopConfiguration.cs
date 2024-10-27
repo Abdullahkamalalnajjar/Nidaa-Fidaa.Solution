@@ -19,13 +19,15 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
            
             builder.HasKey(m => m.Id);
 
-            builder.Property(m => m.ShopPhotoUrl)
+            builder.Property(m => m.PhotoUrl)
                 .HasMaxLength(255) 
-                .IsRequired();  
+                .IsRequired();
 
-       
 
-        
+            builder.Property(m => m.BaseShopPhotoUrl)
+              .HasMaxLength(255)
+              .IsRequired();
+
             builder.Property(m => m.Location)
                 .IsRequired(); 
 
@@ -38,6 +40,14 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
 
+            builder.Property(p => p.DeliveryPrice)
+           .HasColumnType("decimal(18,2)");
+
+            builder.Property(p => p.DeliveryTime)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(p => p.Rating)
+                .HasColumnType("decimal(18,2)");
 
         }
     }

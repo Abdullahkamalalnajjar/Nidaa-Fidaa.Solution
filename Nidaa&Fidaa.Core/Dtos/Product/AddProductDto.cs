@@ -19,5 +19,11 @@ namespace Nidaa_Fidaa.Core.Dtos.Product
         public int ShopId { get; set; }
         public List<IFormFile> Images { get; set; } = new List<IFormFile>();
 
+        public decimal Rating { get; set; }
+        public decimal DeliveryTime { get; set; }
+        public decimal DeliveryPrice { get; set; }
+
+
+
     }
 }

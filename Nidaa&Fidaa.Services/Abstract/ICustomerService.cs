@@ -13,5 +13,6 @@ namespace Nidaa_Fidaa.Services.Abstract
     {
         public Task<Customer> AddCustomerAsync(CustomerDto customer);
         public Task<IReadOnlyCollection<Customer>> GetCustomerWithSpecAsync(ISpecification<Customer> specification);
+        public Task<Customer> GetCustomerById(int id);
     }
 }

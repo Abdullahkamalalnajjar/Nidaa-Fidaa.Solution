@@ -12,9 +12,8 @@ namespace Nidaa_Fidaa.Core.Specification
     {
         public Expression<Func<T, bool>> Critaria { get; set; } 
         public List<Expression<Func<T, object>>> Includes { get; set; }
-        public List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> IncludeStrings { get; set; }
 
-
+        public List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> IncludeChains { get; set; } 
         public Expression<Func<T,object>> OrderBy { get; set; }
         public Expression<Func<T, object>> OrderByDescening { get; set; }
 

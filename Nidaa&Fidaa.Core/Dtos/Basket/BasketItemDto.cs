@@ -11,7 +11,10 @@ namespace Nidaa_Fidaa.Core.Dtos.Basket
         public int BasketId { get; set; }
         public int ProductId { get; set; }
         public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
+        //public decimal UnitPrice { get; set; }
+        public List<int>? AdditionIds { get; set; }
+        public int ProductSizeId { get; set; }
+        public string? Note { get; set; }
     }
 
 }

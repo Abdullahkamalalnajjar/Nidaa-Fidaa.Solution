@@ -15,17 +15,17 @@ namespace Nidaa_Fidaa.Controllers
     {
         private readonly ICustomerService _customerService;
 
-        public CustomerController(ICustomerService customerService )
+        public CustomerController(ICustomerService customerService)
         {
-           _customerService = customerService;
+            _customerService = customerService;
         }
 
         [HttpPost("add-customer")]
 
         public async Task<ActionResult<ApiResponse<Customer>>> AddCustomerAsync([FromForm] CustomerDto customerDto)
-        { 
-        
-            var customer =  await _customerService.AddCustomerAsync(customerDto);
+        {
+
+            var customer = await _customerService.AddCustomerAsync(customerDto);
 
             var response = new ApiResponse<Customer>(200, "تم أضافه الزبون بنجاح", customer);
             return Ok(response);
@@ -37,6 +37,20 @@ namespace Nidaa_Fidaa.Controllers
             var spec = new CustomerSpecification();
             var customers = await _customerService.GetCustomerWithSpecAsync(spec);
             return Ok(customers);
+        }
+        [HttpGet("get-customer-byId")]
+        public async Task<ActionResult<ApiResponse<Customer>>> GetCustomerbyId([FromQuery] int id) { 
+            var customer= await _customerService.GetCustomerById(id);
+            if (customer == null)
+            {
+                return NotFound( new ApiResponse<Customer>(404, "غير موجود "));
+            }
+            else
+            {
+                var response = new ApiResponse<Customer>(200, $"موجود {customer.Name} ", customer);
+                return Ok(response);
+
+            }
         }
     }
 }

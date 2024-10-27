@@ -7,6 +7,7 @@ using Nidaa_Fidaa.Services.Abstract;
 using Nidaa_Fidaa.Services.Implmentaion;
 using Nidaa_Fidaa.Core.Specification.Handller;
 using Nidaa_Fidaa.Core.Dtos.Shop;
+using Twilio.TwiML.Voice;
 
 namespace Nidaa_Fidaa.Controllers
 {
@@ -14,21 +15,21 @@ namespace Nidaa_Fidaa.Controllers
     [Route("api/[controller]")]
     public class ShopController : ControllerBase
     {
-        private readonly IShopService _merchantService;
+        private readonly IShopService _shopservice;
 
-        public ShopController(IShopService merchantService)
+        public ShopController(IShopService shopservice)
         {
-            _merchantService = merchantService;
+          _shopservice = shopservice;
         }
         [HttpPost("AddShop")]
-        public async Task<ActionResult<ApiResponse<Shop>>> AddShop([FromForm] ShopDto merchantDto)
+        public async Task<ActionResult<ApiResponse<Shop>>> AddShop([FromForm] ShopDto shopDto)
         {
 
-            var merchant = await _merchantService.AddShop(merchantDto);
+            var shop = await _shopservice.AddShop(shopDto);
 
-            if (merchant != null)
+            if (shop != null)
             {
-                var response = new ApiResponse<Shop>(200, "تم إضافة المحل  بنجاح", merchant);
+                var response = new ApiResponse<Shop>(200, "تم إضافة المحل  بنجاح", shop);
                 return Ok(response);
             }
 
@@ -38,37 +39,53 @@ namespace Nidaa_Fidaa.Controllers
         }
 
 
-        [HttpPut("UpdateShop")]
-
-        public async Task<ActionResult<Shop>> UpdateShopAsync([FromForm] UpdateShopDto merchantDto)
+        [HttpPut("update-shop")]
+        public async Task<IActionResult> UpdateShopAsync([FromForm] UpdateShopDto dto)
         {
-            var updateMerchant =  await _merchantService.UpdateShop(merchantDto);
-            if (updateMerchant != null) {
-
-                var response = new ApiResponse<Shop>(200, $"{updateMerchant.BusinessName} :  تم تعديل المحل  بنجاح  ", updateMerchant);
-                return Ok(response);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
-            return BadRequest(new ApiResponse<Shop>(400, " المحل  غير موجود "));
 
+            var updatedShop = await _shopservice.UpdateShop(dto);
+            var response = new ApiResponse<Shop>(200, "تم التعديل بنجاح  ", updatedShop);
+
+            return Ok(response);
         }
+
 
         [HttpGet("GetShops")]
-        public async Task<ActionResult<IReadOnlyList<Shop>>> GetShops()
+        public async Task<ActionResult<List<ShopViewDto>>> GetShops()
         {
            
-            var merchants = await _merchantService.GetShops();
-            return Ok(merchants);
+            var shop = await _shopservice.GetShops();
+            return Ok(shop);
         }
 
 
-        [HttpGet("GetShopByCustomerId")]
-        public async Task<ActionResult<List<Shop>>> GetShopById (int id) 
+        [HttpGet("GetShopByTraderId")]
+        public async Task<ActionResult<List<ShopViewDto>>> GetShopByTraderId (int id) 
         {
 
-            var merchant  =await _merchantService.GetShopsByCustomerId(id);
-            if (merchant != null)
+            var shop = await _shopservice.GetShopsByCustomerId(id);
+            if (shop != null)
             {
-                return merchant;
+                return shop;
+            }
+                  return NotFound(new ApiResponse<string>(
+                    statusCode: StatusCodes.Status404NotFound,
+                    message: "المحل غير موجود"
+                ));
+        }
+
+        [HttpGet("GetShopById")]
+        public async Task<ActionResult<ShopViewByid>> GetShopById (int id) 
+        {
+
+            var shop =  await _shopservice.GetShopByid(id);
+            if (shop != null)
+            {
+                return Ok(shop);
             }
                   return NotFound(new ApiResponse<string>(
                     statusCode: StatusCodes.Status404NotFound,
@@ -80,14 +97,14 @@ namespace Nidaa_Fidaa.Controllers
         public async Task<ActionResult<string>> DeleteShopByid(int id)
         {
 
-            var respone = await _merchantService.DeleteShop(id);
+            var respone = await _shopservice.DeleteShop(id);
             return Ok(respone);
         }
 
-        [HttpPost("AddCategory")]
+        [HttpPost("add-category")]
         public async Task<ActionResult<Category>> AddCategoryAsync([FromQuery]CategoryDto categoryDto)
         {
-            var category = await _merchantService.AddCategoryAsync(categoryDto);
+            var category = await _shopservice.AddCategoryAsync(categoryDto);
             if (category != null)
             {
                 return Ok(category);
@@ -96,11 +113,18 @@ namespace Nidaa_Fidaa.Controllers
         }
 
 
-        [HttpGet("GetCategories")]
+        [HttpGet("get-category")]
         public async Task<ActionResult<IReadOnlyList<Category>>> GetCategories()
         {
-            var categories = await _merchantService.GetCategories();
+            var categories = await _shopservice.GetCategories();
             return Ok(categories);
+        }
+
+        [HttpGet("get-product-byCategoryId")]
+        public async Task<ActionResult<IReadOnlyList<Product>>> GetProductByCategoryId(int categoryId)
+        {
+            var products = await _shopservice.GetProductsByCategoryAsync(categoryId);
+            return Ok(products);
         }
     }
 

@@ -22,6 +22,13 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
                    .WithOne(bi => bi.Basket)
                    .HasForeignKey(bi => bi.BasketId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+
+            // العلاقة بين Basket و Order (1 إلى 1) اختيارية
+            builder.HasOne(b => b.Order)
+                   .WithOne()
+                   .HasForeignKey<Basket>(b => b.OrderId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

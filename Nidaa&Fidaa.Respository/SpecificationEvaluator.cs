@@ -25,14 +25,14 @@ namespace Nidaa_Fidaa.Repository
             }
             if (spec.IsPaginatedEnable)
             {
-                query = query.Skip(spec.Skip).Take( spec.Take);
+                query = query.Skip(spec.Skip).Take(spec.Take);
             }
 
             query = spec.Includes.Aggregate(query, (currentQuery, includeExpression) => currentQuery.Include(includeExpression));
-          
-            return query;   
+            query = spec.IncludeChains.Aggregate(query, (currentQuery, includeChain) => includeChain(currentQuery));
+            return query;
+
         }
     }
 }
-
 

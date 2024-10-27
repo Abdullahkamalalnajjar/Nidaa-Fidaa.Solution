@@ -25,6 +25,7 @@ namespace Nidaa_Fidaa.Core.Repository
 
         #region DynamicRepository
         public Task<IReadOnlyCollection<T>> GetAllWithSpecAsync(ISpecification<T> specification);
+        public Task<T?> GetSingleWithSpecAsync(ISpecification<T> specification);
         public Task<T> GetByIdWithSpecAsync(ISpecification<T> specification);
 
 

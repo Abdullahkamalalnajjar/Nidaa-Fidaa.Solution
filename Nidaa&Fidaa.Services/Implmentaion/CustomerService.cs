@@ -15,19 +15,51 @@ namespace Nidaa_Fidaa.Services.Implmentaion
     public class CustomerService : ICustomerService
     {
         private readonly IGenericRepository<Customer> _customerRepo;
+        private readonly IGenericRepository<Basket> _basketRepository;
         private readonly IMapper mapper;
 
-        public CustomerService(IGenericRepository<Customer> customerRepo, IMapper mapper)
+        public CustomerService(IGenericRepository<Customer> customerRepo,IGenericRepository<Basket> basketRepository, IMapper mapper)
         {
           _customerRepo = customerRepo;
+            _basketRepository =basketRepository;
             this.mapper = mapper;
         }
-        public async Task<Customer> AddCustomerAsync(CustomerDto customer)
-        {
-            var customerMapping = mapper.Map<Customer>(customer);   
 
-            await _customerRepo.AddAsync(customerMapping);
-            return customerMapping;
+
+        public async Task<Customer> AddCustomerAsync(CustomerDto customerDto)
+        {
+            // تحويل CustomerDto إلى Customer entity
+            var customer = mapper.Map<Customer>(customerDto);
+
+            // إضافة العميل إلى قاعدة البيانات
+            await _customerRepo.AddAsync(customer);
+
+            // إنشاء سلة جديدة للعميل
+            var basket = new Basket
+            {
+                CustomerId = customer.Id,
+                Items = new List<BasketItem>()
+            };
+
+            // إضافة السلة إلى قاعدة البيانات
+            await _basketRepository.AddAsync(basket);
+
+            return customer;
+        }
+
+
+        public async Task<Customer> GetCustomerById(int id)
+        {
+           var existingCustomer=  _customerRepo.GetTableNoTracking().Where(c=>c.Id.Equals(id)).FirstOrDefault();
+            if (existingCustomer != null)
+            {
+                return existingCustomer;
+            }
+            else
+            {
+               return null;
+            }
+            
         }
 
         public async Task<IReadOnlyCollection<Customer>> GetCustomerWithSpecAsync(ISpecification<Customer> specification)

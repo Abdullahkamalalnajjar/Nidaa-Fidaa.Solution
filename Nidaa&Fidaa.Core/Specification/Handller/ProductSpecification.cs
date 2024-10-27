@@ -9,11 +9,27 @@ namespace Nidaa_Fidaa.Core.Specification.Handller
 {
     public class ProductSpecification:BaseSpecification<Product>
     {
-        public ProductSpecification() {
+        public ProductSpecification(string? title=null) {
 
+            if (!string.IsNullOrEmpty(title))
+            {
+                Critaria = p => p.Title.Contains(title);
+            }
             Includes.Add(i=>i.Images);
             Includes.Add(s=>s.ProductSizes);   
             Includes.Add(pd=>pd.ProductAdditions);
+            Includes.Add(c => c.Category);
+
+
+        }
+
+        public ProductSpecification(int id) : base(p =>p.ProductId.Equals(id)) 
+        {
+            Includes.Add(i => i.Images);
+            Includes.Add(s => s.ProductSizes);
+            Includes.Add(pd => pd.ProductAdditions);
+            Includes.Add(c => c.Category);
+
         }
     }
 }

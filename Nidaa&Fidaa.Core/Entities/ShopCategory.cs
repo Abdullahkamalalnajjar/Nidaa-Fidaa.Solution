@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Nidaa_Fidaa.Core.Dtos.Shop;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -11,6 +13,7 @@ namespace Nidaa_Fidaa.Core.Entities
 {
     public class ShopCategory
     {
+        [Key]
         public int ShopId { get; set; }
         [JsonIgnore]
         public Shop Shop { get; set; }
@@ -18,6 +21,7 @@ namespace Nidaa_Fidaa.Core.Entities
         public int CategoryId { get; set; }
         [JsonIgnore]
         public Category Category { get; set; }
+        public ICollection<Product> Products { get; set;}=new List<Product>();
     }
 
 }

@@ -12,10 +12,11 @@ namespace Nidaa_Fidaa.Core.Dtos.Shop
     {
         public int Id { get; set; }
      //   public string MerchantPhotoUrl { get; set; }
-        public string ShopPhotoUrl { get; set; }
-        public string Location { get; set; }
-        public string BusinessName { get; set; }
-        public string BusinessType { get; set; }
+        public string? BaseShopPhotoUrl { get; set; }
+        public string? PhotoUrl { get; set; }
+        public string? Location { get; set; }
+        public string? BusinessName { get; set; }
+        public string? BusinessType { get; set; }
         public List<ShopCategoryDto> SelectCatergoryIds { get; set; }  // قائمة معرفات الأقسام
     }
 }

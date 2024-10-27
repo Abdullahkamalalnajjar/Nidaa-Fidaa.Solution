@@ -9,7 +9,7 @@ namespace Nidaa_Fidaa.Core.Entities
     public class Driver
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public int IDNumber { get; set; }
         public string? Governorate { get; set; }
         public string? Municipality { get; set; } //البلديه

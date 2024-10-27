@@ -15,5 +15,7 @@ public class ProductSizeConfig : IEntityTypeConfiguration<ProductSize>
         builder.Property(ps => ps.Size)
             .IsRequired()
             .HasMaxLength(10);
+        builder.Navigation(p => p.Product).AutoInclude(false);
+
     }
 }

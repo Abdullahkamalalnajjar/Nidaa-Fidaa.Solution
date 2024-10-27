@@ -8,9 +8,9 @@ namespace Nidaa_Fidaa.Core.Dtos.Product
 {
     public class ProductSizeDto
     {
-        public int ProductId { get; set; }
+      public int ProductId { get; set; }
 
-        public string Size { get; set; }
+       public string Size { get; set; }
         public decimal Price { get; set; }
     }
 

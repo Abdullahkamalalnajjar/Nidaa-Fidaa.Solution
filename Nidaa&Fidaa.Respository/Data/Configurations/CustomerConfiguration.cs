@@ -20,6 +20,11 @@ namespace Nidaa_Fidaa.Respository.Data.Configurations
             builder.Property(p=>p.Address).IsRequired();
             builder.Property(p=>p.Governorate).IsRequired();
 
+            // العلاقة بين Customer و Basket
+            builder.HasOne(c => c.Basket)
+                   .WithOne(b => b.Customer)
+                   .HasForeignKey<Basket>(b => b.CustomerId);
+
 
         }
     }
